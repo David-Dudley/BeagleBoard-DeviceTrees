@@ -1,0 +1,103 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/*
+ * Copyright (C) 2015 Robert Nelson <robertcnelson@gmail.com>
+ * Copyright (C) 2019 Amilcar Lucas <amilcar.lucas@iav.de>
+ * Copyright (c) 2026 David Dudley <dudleyd@frib.msu.edu>
+ */
+
+/dts-v1/;
+/plugin/;
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/pinctrl/am33xx.h>
+
+/*
+ * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+ */
+&{/chosen} {
+	overlays {
+		BB-MSU-IOPINS.kernel = __TIMESTAMP__;
+	};
+};
+
+/*
+ * Free up the pins used by the cape from the pinmux helpers.
+ */
+&ocp {
+	/* Power control pins */
+	P8_7_pinmux { status = "disabled"; };	/* P8_7 (R7): gpmc_advn_ale.gpio2_3 */
+	P8_9_pinmux { status = "disabled"; };	/* P8_9 (R9): gpmc_ad6.gpio1_6 */
+	P8_11_pinmux { status = "disabled"; };	/* P8_11 (R8): gpmc_ad2.gpio1_2 */
+	/* Device selection pins */
+	P9_12_pinuux { status = "disabled"; };	/* P9_12 (U18): gpmc_beN1.gpio1_28 */
+	P8_26_pinmux { status = "disabled"; };	/* P8_26 (V6): gpmc_csN0.gpio1_29 */
+	P8_15_pinmux { status = "disabled"; };	/* P8_15 (U13): gpmc_ad15.gpio1_15 */
+	P9_15_pinmux { status = "dosabled"; };	/* P9_15 (R13): gpmc_a0.gpio1_16 */
+};
+
+&am33xx_pinmux {
+	bb_msu_iopins: pinmux_bb_msu_iopins {
+		pinctrl-single,pins = <
+			/* Power output control pins */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_ADVN_ALE, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* P8_7: +3.3V ON */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_BEN0_CLE, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* P8_3: +24V ON */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_AD13, PIN_OUTPUT_PULLDOWN, MUX_MODE7)		/* P8_5: +5V ON */
+			/* Device Selection Pins */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_BEN1, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL0 */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_CSN0, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL1 */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_AD15, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL2 */
+			AM33XX_PADCONF(AM335X_PIN_GPMC_A0, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL3 */
+		>;
+	};
+};
+
+&{/} {
+	leds {
+		pinctrl-names = "default";
+		pinctrl-0 = <&bb_msu_iopins>;
+
+		compatible = "gpio-leds";
+
+		jp@1 {
+			label = "+24V";
+			gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+
+		jp@2 {
+			label = "+5V";
+			gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+
+		jp@3 {
+			label = "+3.3V";
+			gpios = <&gpio2 3 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+
+		jp@4 {
+			label = "SEL0";
+			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+
+		jp@5 {
+			label = "SEL1";
+			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+
+		jp@6 {
+			label = "SEL2";
+			gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+
+		jp@7 {
+			label = "SEL3";
+			gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
+			default-state = "keep";
+		};
+	};
+};
