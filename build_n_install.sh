@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -f /sys/devices/soc0/family ] ; then
-	make clean
+#	make clean
 	soc_family=$(cat /sys/devices/soc0/family || true)
 	case "${soc_family}" in
 	AM62X|J721E|J722S)

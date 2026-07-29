@@ -58,46 +58,49 @@
 
 		compatible = "gpio-leds";
 
+		/* All Power control outputs start in a OFF state */
 		jp@1 {
-			label = "+24V";
-			gpios = <&gpio1 6 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			label = "Control_+24V";
+			gpios = <&gpio2 2 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
 		};
 
 		jp@2 {
-			label = "+5V";
-			gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			label = "Control_+5V";
+			gpios = <&gpio2 5 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
 		};
 
 		jp@3 {
-			label = "+3.3V";
-			gpios = <&gpio2 3 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			label = "Control_+3.3V";
+			gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+			default-state = "off";
 		};
 
+		/* All the SELx bits start in an ON state, so by default I'm selecting device 15 */
 		jp@4 {
 			label = "SEL0";
-			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
 		};
 
 		jp@5 {
 			label = "SEL1";
-			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
 		};
 
 		jp@6 {
 			label = "SEL2";
-			gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
 		};
 
 		jp@7 {
 			label = "SEL3";
-			gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
-			default-state = "keep";
+			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
+			default-state = "on";
 		};
+
 	};
 };

@@ -2,6 +2,9 @@
 /*
  * Copyright (C) 2013 CircuitCo
  * Virtual cape for SPI1 on connector pins P9.29 P9.31 P9.30 P9.28
+ *
+ * Revised 7/20/2026 D. Dudleyd
+ * 		Added spi1_cs1 as pin P9.42
  */
 
 /dts-v1/;
@@ -28,6 +31,8 @@
 	P9_30_pinmux { status = "disabled"; };	/* P9_30 (D12) mcasp0_axr0.spi1_d1 */
 	P9_29_pinmux { status = "disabled"; };	/* P9_29 (B13) mcasp0_fsx.spi1_d0 */
 	P9_31_pinmux { status = "disabled"; };	/* P9_31 (A13) mcasp0_aclkx.spi1_sclk */
+	P9_42_pinmux { status = "disabled"; };	/* P9_42 (C18) ECAP0_IN_PWM0_OUT */
+
 };
 
 &am33xx_pinmux {
@@ -37,6 +42,7 @@
 			AM33XX_PADCONF(AM335X_PIN_MCASP0_FSX, PIN_INPUT, MUX_MODE3)	/* P9_29 (B13) mcasp0_fsx.spi1_d0 */
 			AM33XX_PADCONF(AM335X_PIN_MCASP0_AXR0, PIN_INPUT, MUX_MODE3)	/* P9_30 (D12) mcasp0_axr0.spi1_d1 */
 			AM33XX_PADCONF(AM335X_PIN_MCASP0_AHCLKR, PIN_INPUT, MUX_MODE3)	/* P9_28 (C12) mcasp0_ahclkr.spi1_cs0 */
+			AM33XX_PADCONF(AM335X_PIN_ECAP0_IN_PWM0_OUT, PIN_INPUT, MUX_MODE2)	/* P9_42 (C18) ECAP0_IN_OWM0_OUT, spi1_CS1 */
 		>;
 	};
 };
@@ -54,7 +60,7 @@
 	 * input. The default is D0 as input and
 	 * D1 as output.
 	 */
-	//ti,pindir-d0-out-d1-in;
+	ti,pindir-d0-out-d1-in;
 
 	channel@0 {
 		#address-cells = <1>;
