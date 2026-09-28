@@ -3,6 +3,39 @@
  * Copyright (C) 2015 Robert Nelson <robertcnelson@gmail.com>
  * Copyright (C) 2019 Amilcar Lucas <amilcar.lucas@iav.de>
  * Copyright (c) 2026 David Dudley <dudleyd@frib.msu.edu>
+ * Revisions:
+ * 1. Started as io-pins
+ * 2. Convert to Fragment format
+ * 3. Incorporate new I/O pins structure
+ *
+ *  *
+ * DT Overlay for GPIOs
+ * P8.07 (24VON) [AD24],
+ * P8.09 (5VON) [AE24],
+ * P8.11 (3V3ON) [AB24],
+ * P8.15 (SEL2) [AB29],
+ * P8.26 (SEL1) [AC27],
+ * P9.12 (SEL0) [AE27],
+ * & P9.15 (SEL3) [AD25],
+ *  GPIOs are enabled with this overlay.
+ * Make sure the IO pins you are enabling are not being used by any other overlay.
+ *
+ * In addition, the SPI channels that are needed will eventually be incorporated into this
+ *
+ * SPI Definitions as defined in this overlay
+ *
+ * SPI0 - no clk or d0 pins.
+ *  spi0.d1 = P9.17(0)
+ *  spi0.cs0 = P8.33(0)
+ *  spi0.cs2 = P9.42(2)
+ *  spi0.cs3 = P9.27(2)
+ *
+ * SPI1 - no cs available on P8/P9.  Available on mikrobus connector
+ *  spi1.clk = P9.26(0)
+ *  spi1.d0 = P9.24(0)
+ *  spi1.d1 = P9.18(0)
+ *
+ * Only certain combinations are valid
  */
 
 /dts-v1/;
@@ -11,96 +44,123 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/am33xx.h>
 
-/*
- * Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
- */
-&{/chosen} {
-	overlays {
-		BB-MSU-IOPINS.kernel = __TIMESTAMP__;
+
+/ {
+	/*
+	* Helper to show loaded overlays under: /proc/device-tree/chosen/overlays/
+	*/
+	fragment@0 {
+		target-path = "/chosen";
+
+		__overlay__ {
+
+			overlays {
+				BB-MSU-IOPINS.kernel = "Wed Jul  8 14:33:52 2026";
+			};
+		};
 	};
-};
+
 
 /*
  * Free up the pins used by the cape from the pinmux helpers.
  */
-&ocp {
-	/* Power control pins */
-	P8_7_pinmux { status = "disabled"; };	/* P8_7 (R7): gpmc_advn_ale.gpio2_3 */
-	P8_9_pinmux { status = "disabled"; };	/* P8_9 (R9): gpmc_ad6.gpio1_6 */
-	P8_11_pinmux { status = "disabled"; };	/* P8_11 (R8): gpmc_ad2.gpio1_2 */
-	/* Device selection pins */
-	P9_12_pinuux { status = "disabled"; };	/* P9_12 (U18): gpmc_beN1.gpio1_28 */
-	P8_26_pinmux { status = "disabled"; };	/* P8_26 (V6): gpmc_csN0.gpio1_29 */
-	P8_15_pinmux { status = "disabled"; };	/* P8_15 (U13): gpmc_ad15.gpio1_15 */
-	P9_15_pinmux { status = "dosabled"; };	/* P9_15 (R13): gpmc_a0.gpio1_16 */
-};
+	fragment@1 {
+		target = <&ocp>;
 
-&am33xx_pinmux {
-	bb_msu_iopins: pinmux_bb_msu_iopins {
-		pinctrl-single,pins = <
-			/* Power output control pins */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_ADVN_ALE, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* P8_7: +3.3V ON */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_BEN0_CLE, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* P8_3: +24V ON */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_AD13, PIN_OUTPUT_PULLDOWN, MUX_MODE7)		/* P8_5: +5V ON */
-			/* Device Selection Pins */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_BEN1, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL0 */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_CSN0, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL1 */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_AD15, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL2 */
-			AM33XX_PADCONF(AM335X_PIN_GPMC_A0, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL3 */
-		>;
+		__overlay__ {
+			// Power Control pins
+			P8_7_pinmux {status = "disabled";};       // P8_7 (R7): gpmc_advn_ale.gpio2_3
+			P8_9_pinmux {status = "disabled";};       // P8_9 (R9): gpmc_ad6.gpio1_6
+			P8_11_pinmux {status = "disabled";};      // P8_11 (R8): gpmc_ad2.gpio1_2
+			// Device Selection Pins
+			P9_12_pinuux {status = "disabled";};      // P9_12 (U18): gpmc_beN1.gpio1_28
+			P8_26_pinmux {status = "disabled";};      // P8_26 (V6): gpmc_csN0.gpio1_29
+			P8_15_pinmux {status = "disabled";};      // P8_15 (U13): gpmc_ad15.gpio1_15
+			P9_15_pinmux {status = "disabled";};      // P9_15 (R13): gpmc_a0.gpio1_16
+		};
 	};
-};
 
-&{/} {
-	leds {
-		pinctrl-names = "default";
-		pinctrl-0 = <&bb_msu_iopins>;
+	fragment@2 {
+		target = <&am33xx_pinmux>;
 
-		compatible = "gpio-leds";
-
-		/* All Power control outputs start in a OFF state */
-		jp@1 {
-			label = "Control_+24V";
-			gpios = <&gpio2 2 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
+		__overlay__
+		{
+			bb_msu_iopins: pinmux_bb_msu_iopins
+			{
+				pinctrl-single,pins = <
+					/* Power output control pins */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_ADVN_ALE, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* P8_7: +3.3V ON */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_BEN0_CLE, PIN_OUTPUT_PULLDOWN, MUX_MODE7)	/* P8_3: +24V ON */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_AD13, PIN_OUTPUT_PULLDOWN, MUX_MODE7)		/* P8_5: +5V ON */
+					/* Device Selection Pins */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_BEN1, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL0 */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_CSN0, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL1 */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_AD15, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL2 */
+					AM33XX_PADCONF(AM335X_PIN_GPMC_A0, PIN_OUTPUT_PULLUP, MUX_MODE7)			/* SEL3 */
+				>;
+			};
 		};
+	};
 
-		jp@2 {
-			label = "Control_+5V";
-			gpios = <&gpio2 5 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
+	fragment@3 {
+		target-path = "/";
+
+		__overlay__ {
+
+			leds {
+				pinctrl-names = "default";
+				pinctrl-0 = <0x01>;
+				compatible = "gpio-leds";
+
+				24VON
+				{
+					label = "Control_+24V";
+					gpios = <&gpio2 2 GPIO_ACTIVE_HIGH>;
+					default-state = "off";
+				};
+
+				5VON
+				{
+					label = "Control_+5V";
+					gpios = <&gpio2 5 GPIO_ACTIVE_HIGH>;
+					default-state = "off";
+				};
+
+				3V3ON
+				{
+					label = "Control_+3.3V";
+					gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
+					default-state = "off";
+				};
+
+				SEL0
+				{
+					label = "SEL0";
+					gpios = <&gpio1 0x1c 0x00>;
+					default-state = "on";
+				};
+
+				SEL1
+				{
+					label = "SEL1";
+					gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
+					default-state = "on";
+				};
+
+				SEL2
+				{
+					label = "SEL2";
+					gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
+					default-state = "on";
+				};
+
+				SEL3
+				{
+					label = "SEL3";
+					gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
+					default-state = "on";
+				};
+			};
 		};
-
-		jp@3 {
-			label = "Control_+3.3V";
-			gpios = <&gpio1 13 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
-		};
-
-		/* All the SELx bits start in an ON state, so by default I'm selecting device 15 */
-		jp@4 {
-			label = "SEL0";
-			gpios = <&gpio1 28 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
-		};
-
-		jp@5 {
-			label = "SEL1";
-			gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
-		};
-
-		jp@6 {
-			label = "SEL2";
-			gpios = <&gpio1 15 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
-		};
-
-		jp@7 {
-			label = "SEL3";
-			gpios = <&gpio1 16 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
-		};
-
 	};
 };
