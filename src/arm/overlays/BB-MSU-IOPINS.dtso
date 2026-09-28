@@ -109,7 +109,7 @@
 
 			leds {
 				pinctrl-names = "default";
-				pinctrl-0 = <0x01>;
+				pinctrl-0 = <&bb_msu_iopins>;
 				compatible = "gpio-leds";
 
 				24VON
